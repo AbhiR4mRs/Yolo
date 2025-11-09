@@ -1,48 +1,25 @@
-# ==========================
-# YOLO + Python Project Ignore
-# ==========================
-
-# Byte-compiled / cache
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Model weights
+# Ignore heavy / generated files
+runs/
+paper_dataset_2534/
 *.pt
 *.torchscript
 *.onnx
-*.engine
-*.tflite
-*.mlmodel
-*.pb
-
-# Dataset & Media
-paper_dataset_2534/
+*.zip
+*.mp4
+*.png
 *.jpg
 *.jpeg
-*.png
 *.bmp
-*.mp4
-*.avi
-*.mkv
 *.csv
-*.zip
-
-# Training outputs
-runs/
-exp*/
 *.log
 
-# IDEs / Editors
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE / system
 .vscode/
 .idea/
-
-# OS files
 .DS_Store
 Thumbs.db
-
-# Python environment
-venv/
-env/
-.yolov5_gpu/
