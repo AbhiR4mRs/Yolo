@@ -1,3 +1,10 @@
+# Ignore virtual environments
+yolov5_gpu/
+yolov5_gpu_linux/
+env/
+venv/
+
+
 # Ignore heavy / generated files
 runs/
 paper_dataset_2534/
