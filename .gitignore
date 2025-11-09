@@ -1,31 +1,26 @@
-# Ignore virtual environments
+# Virtual environments
 yolov5_gpu/
 yolov5_gpu_linux/
 env/
 venv/
 
-
-# Ignore heavy / generated files
+# Heavy generated content
 runs/
 paper_dataset_2534/
 *.pt
 *.torchscript
 *.onnx
-*.zip
 *.mp4
 *.png
 *.jpg
 *.jpeg
-*.bmp
+*.zip
 *.csv
 *.log
 
-# Python cache
+# Caches and system files
 __pycache__/
 *.pyc
-*.pyo
-
-# IDE / system
 .vscode/
 .idea/
 .DS_Store
