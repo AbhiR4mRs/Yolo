@@ -1,150 +1,88 @@
-🚆 Railway Track Foreign Object Detection using YOLO
+# 🚆 Railway Track Foreign Object Detection using YOLO
 
-A Computer Vision-based safety system that detects foreign objects on railway tracks using the YOLO object detection algorithm. This system aims to improve railway safety by identifying obstacles such as pedestrians, vehicles, animals, or debris that could lead to accidents.
+A **Computer Vision-based safety system** that detects foreign objects on railway tracks using the **YOLO object detection algorithm**.  
+This system aims to improve railway safety by identifying obstacles such as **pedestrians, vehicles, animals, or debris** that could lead to accidents.
 
-📖 Introduction
+---
 
-Railway tracks are vulnerable to foreign object intrusion, which can lead to dangerous accidents and operational disruptions. This project implements a deep learning–based detection system capable of identifying such objects in real-time using YOLO (You Only Look Once). The goal is to assist railway monitoring systems by providing automated visual detection of hazards on railway tracks.
+# 📖 Introduction
 
-✨ Key Features
+Railway tracks are vulnerable to **foreign object intrusion**, which can lead to dangerous accidents and operational disruptions.
 
-🚆 Detects foreign objects on railway tracks
+This project implements a **deep learning–based detection system** capable of identifying such objects in **real-time using YOLO (You Only Look Once)**.
 
-⚡ Real-time object detection using YOLO
+The goal is to assist railway monitoring systems by providing **automated visual detection of hazards on railway tracks**.
 
-📷 Works with images and video streams
+---
 
-🧠 Deep learning-based object recognition
+# ✨ Key Features
 
-📦 Lightweight and extendable system
+- 🚆 Detects foreign objects on railway tracks  
+- ⚡ Real-time object detection using YOLO  
+- 📷 Works with images and video streams  
+- 🧠 Deep learning-based object recognition  
+- 📦 Lightweight and extendable system  
+- 🛠 Easy to modify and train with new datasets  
 
-🛠 Easy to modify and train with new datasets
+---
 
-🧠 Methodology
+# 🧠 Methodology
 
 The system processes railway images through the following pipeline:
-
 Input Image / Video
-        ↓
+↓
 Image Preprocessing
-        ↓
+↓
 YOLO Object Detection Model
-        ↓
+↓
 Object Classification
-        ↓
+↓
 Bounding Box Detection
-        ↓
+↓
 Hazard Identification
 
 
-🛠 Technologies Used
+---
 
-Programming: Python
+# 🛠 Technologies Used
 
-Computer Vision: OpenCV
+### Programming
+- Python
 
-Deep Learning: YOLO, PyTorch / Darknet
+### Computer Vision
+- OpenCV
 
-Libraries: NumPy, Matplotlib
+### Deep Learning
+- YOLO  
+- PyTorch / Darknet
 
-📂 Project Structure
+### Libraries
+- NumPy  
+- Matplotlib  
 
+---
+
+# 📂 Project Structure
 Yolo/
 │
-├── dataset/          # Training images and labels
-├── models/           # YOLO configuration and weights
-├── outputs/          # Detection results
-├── detect.py         # Object detection script
-├── train.py          # Model training script
-├── utils/            # Utility scripts
+├── dataset/ # Training images and labels
+├── models/ # YOLO configuration and weights
+├── outputs/ # Detection results
+├── detect.py # Object detection script
+├── train.py # Model training script
+├── utils/ # Utility scripts
 └── README.md
 
 
-⚙️ Installation
+---
 
-Clone the repository:
+# ⚙️ Installation
 
-git clone [https://github.com/AbhiR4mRs/Yolo.git](https://github.com/AbhiR4mRs/Yolo.git)
+### Clone the repository
 
-
-Navigate to the project folder:
-
+```bash
+git clone https://github.com/AbhiR4mRs/Yolo.git
 cd Yolo
-
-
-Install dependencies:
-
 pip install -r requirements.txt
-
-
-▶️ Running the Project
-
-Run object detection on an image:
-
 python detect.py
-
-
-Run detection on a video:
-
 python detect.py --source video.mp4
-
-
-📸 Detection Example
-
-The model detects foreign objects and displays bounding boxes with confidence scores.
-
-Example Output:
-
-Person detected – Confidence: 0.95
-
-Rock detected – Confidence: 0.88
-
-Vehicle detected – Confidence: 0.91
-
-🚆 Applications
-
-This system can be used for:
-
-Railway track monitoring
-
-Intrusion detection systems
-
-Railway surveillance automation
-
-Smart transportation infrastructure
-
-Accident prevention systems
-
-🔮 Future Improvements
-
-Possible improvements include:
-
-[ ] Real-time railway monitoring dashboard
-
-[ ] Risk level classification of detected objects
-
-[ ] Integration with railway CCTV systems
-
-[ ] Edge device deployment
-
-[ ] Multi-camera railway surveillance
-
-👨‍💻 Author
-
-Abhiram R S
-
-📧 Email: abhiramvellur40@gmail.com
-
-🔗 GitHub: @AbhiR4mRs
-
-🔗 LinkedIn: Abhiram R S
-
-⭐ Show Your Support
-
-If you like this project:
-
-⭐ Star this repository
-
-🍴 Fork this repository
-
-📢 Share it with others
