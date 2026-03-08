@@ -1,0 +1,6 @@
+train: C:/Users/abhir/Documents/yolo/dataset/detection/images/train
+val: C:/Users/abhir/Documents/yolo/dataset/detection/images/val
+test: C:/Users/abhir/Documents/yolo/dataset/detection/images/test
+
+nc: 3
+names: ['vehicle','pedestrian','rockfall']
