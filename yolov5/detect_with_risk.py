@@ -1,0 +1,94 @@
+import argparse
+import cv2
+import torch
+import numpy as np
+from pathlib import Path
+from models.common import DetectMultiBackend
+from utils.dataloaders import LoadImages
+from utils.general import (check_img_size, non_max_suppression, scale_boxes, check_requirements)
+from utils.torch_utils import select_device
+
+# === Risk Assessment Function (for 3 classes) ===
+def compute_risk_score(cls_name, bbox, frame_width, frame_height):
+    risk_weights = {
+        'pedestrian': 0.9,
+        'vehicle': 0.7,
+        'rockfall': 0.6
+    }
+    type_score = risk_weights.get(cls_name, 0.5)
+    x_center = (bbox[0] + bbox[2]) / 2
+    dist = abs(x_center - frame_width / 2) / (frame_width / 2)
+    distance_score = 1 - dist
+    area = (bbox[2] - bbox[0]) * (bbox[3] - bbox[1])
+    area_ratio = area / (frame_width * frame_height)
+
+    total_risk = 0.6 * type_score + 0.25 * distance_score + 0.15 * area_ratio
+    return round(total_risk, 3)
+
+@torch.no_grad()
+def run(weights, source, imgsz=640, conf_thres=0.25, iou_thres=0.45, device=''):
+    save_dir = Path('runs/detect_with_risk')
+    save_dir.mkdir(parents=True, exist_ok=True)
+    
+    device = select_device(device)
+    model = DetectMultiBackend(weights, device=device)
+    stride, names, pt = model.stride, model.names, model.pt
+    imgsz = check_img_size((imgsz, imgsz), s=stride)
+    dataset = LoadImages(source, img_size=imgsz, stride=stride, auto=pt)
+
+    model.warmup(imgsz=(1, 3, *imgsz))
+
+    for path, im, im0s, vid_cap, s in dataset:
+        im = torch.from_numpy(im).to(device)
+        im = im.float() / 255.0
+        if im.ndimension() == 3:
+            im = im.unsqueeze(0)
+
+        pred = model(im)
+        pred = non_max_suppression(pred, conf_thres, iou_thres, max_det=1000)
+
+        im0 = im0s.copy()
+        frame_h, frame_w = im0.shape[:2]
+
+        for det in pred:
+            if len(det):
+                det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
+
+                for *xyxy, conf, cls in reversed(det):
+                    cls_name = names[int(cls)]
+                    bbox = [float(xyxy[0]), float(xyxy[1]), float(xyxy[2]), float(xyxy[3])]
+                    risk = compute_risk_score(cls_name, bbox, frame_w, frame_h)
+
+                    label = f"{cls_name} {conf:.2f} | Risk: {risk:.2f}"
+                    color = (0, 0, 255) if risk > 0.5 else (0, 255, 255) if risk > 0.3 else (0, 255, 0)
+                    x1, y1, x2, y2 = map(int, xyxy)
+
+                    # Draw box and label clearly
+                    cv2.rectangle(im0, (x1, y1), (x2, y2), color, 2)
+                    cv2.rectangle(im0, (x1, y1 - 25), (x1 + 240, y1), color, -1)
+                    cv2.putText(im0, label, (x1 + 5, y1 - 7),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
+
+        save_path = save_dir / Path(path).name
+        cv2.imwrite(str(save_path), im0)
+        print(f"✅ Saved: {save_path}")
+
+    print("✅ Detection with Risk Assessment completed.")
+
+def parse_opt():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--weights', type=str, default='yolov5s.pt')
+    parser.add_argument('--source', type=str, default='data/images')
+    parser.add_argument('--imgsz', type=int, default=640)
+    parser.add_argument('--conf-thres', type=float, default=0.25)
+    parser.add_argument('--iou-thres', type=float, default=0.45)  # ✅ correct
+    parser.add_argument('--device', default='')
+    return parser.parse_args()
+
+def main(opt):
+    check_requirements(exclude=('tensorboard', 'thop'))
+    run(**vars(opt))
+
+if __name__ == "__main__":
+    opt = parse_opt()
+    main(opt)

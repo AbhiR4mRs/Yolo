@@ -1,0 +1,86 @@
+# YOLOv5 🚀 by Ultralytics, GPL-3.0 license
+
+# Parameters
+nc: 3  # number of classes (animal, moto, person, rock, vehicle)
+depth_multiple: 1.0  # model depth multiple
+width_multiple: 1.0  # layer channel multiple
+anchors:
+  - [10,13, 16,30, 33,23]  # P3/8
+  - [30,61, 62,45, 59,119] # P4/16
+  - [116,90, 156,198, 373,326] # P5/32
+
+# -----------------------------------------------------------------
+# MobileNetV3-CATr + BiFPN-Lite
+# This architecture is based on the paper's figures and descriptions.
+# -----------------------------------------------------------------
+
+# Backbone (MobileNetV3-CATr)
+backbone:
+  # [from, number, module, args]
+  #                                                              # 0-P1/2
+  [[-1, 1, Conv, [16, 3, 2]],                                     
+   # [oup, kernel, stride, exp_size, use_ca]
+   [-1, 1, CA_Bneck, [16, 3, 2, 16, 1]],                       # 1-P2/4 (Use_ca=1)
+   [-1, 1, CA_Bneck, [24, 3, 2, 72, 0]],                      # 2-P3/8 (Use_ca=0)
+   [-1, 1, CA_Bneck, [24, 3, 1, 88, 0]],                      # 3 (SAVE P3)
+   [-1, 1, CA_Bneck, [40, 5, 2, 96, 1]],                       # 4-P4/16
+   [-1, 1, CA_Bneck, [40, 5, 1, 240, 1]],                      # 5
+   [-1, 1, CA_Bneck, [40, 5, 1, 240, 1]],                      # 6 (SAVE P4)
+   [-1, 1, CA_Bneck, [48, 5, 1, 120, 1]],                      # 7
+   [-1, 1, CA_Bneck, [48, 5, 1, 144, 1]],                      # 8
+   [-1, 1, CA_Bneck, [96, 5, 2, 288, 1]],                      # 9-P5/32
+   [-1, 1, CA_Bneck, [96, 5, 1, 576, 1]],                      # 10
+   [-1, 1, CA_Bneck, [96, 5, 1, 576, 1]],                      # 11
+   
+   # Add TransformerBlock as per paper
+   # [c_in, c_out, num_heads, num_layers]
+   [-1, 1, TransformerBlockPaper, [96, 96, 4, 1]],                   # 12
+   
+   # Add SPPF as per Figure 2
+   [-1, 1, SPPF, [96, 5]],                                        # 13 (SAVE P5)
+  ]
+
+
+# Head (BiFPN-Lite + YOLO Head)
+# --- CORRECTED SYNTAX ---
+head:
+  [
+   # --- Channel unification ---
+   # P5 from backbone (layer 13)
+   [-1, 1, Conv, [96, 1, 1]],                                     # 14 (P5_in, c=96)
+   
+   # P4 from backbone (layer 6)
+   [6, 1, Conv, [40, 1, 1]],                                      # 15 (P4_in, c=40)
+   
+   # P3 from backbone (layer 3)
+   [3, 1, Conv, [24, 1, 1]],                                      # 16 (P3_in, c=24)
+
+   # --- Top-down path (Figure 6) ---
+   # P5_td is layer 14
+   [14, 1, nn.Upsample, [None, 2, 'nearest']],                    # 17 (Upsample P5_td)
+   [[15, 17], 1, Concat, [1]],                                    # 18 (concat P4_in, Upsample(P5_td))
+   [-1, 1, Conv, [40, 1, 1]],                                     # 19 (P4_td, c=40)
+   
+   [-1, 1, nn.Upsample, [None, 2, 'nearest']],                    # 20 (Upsample P4_td)
+   [[16, 20], 1, Concat, [1]],                                    # 21 (concat P3_in, Upsample(P4_td))
+   
+   # P3_out (N3) - This is the first output to the Detect head
+   [-1, 1, Conv, [24, 1, 1]],                                     # 22 (P3_out / N3, c=24)
+   
+   # --- Bottom-up path (Figure 6) ---
+   [-1, 1, Conv, [24, 3, 2]],                                     # 23 (Downsample P3_out)
+   [[19, 23], 1, Concat, [1]],                                    # 24 (concat P4_td, Downsample(P3_out))
+   
+   # P4__out (N4) - This is the second output to the Detect head
+   [-1, 1, Conv, [40, 1, 1]],                                     # 25 (P4_out / N4, c=40)
+   
+   [-1, 1, Conv, [40, 3, 2]],                                     # 26 (Downsample P4_out)
+   [[14, 26], 1, Concat, [1]],                                    # 27 (concat P5_in, Downsample(P4_out))
+   
+   # P5_out (N5) - This is the third output to the Detect head
+   [-1, 1, Conv, [96, 1, 1]],                                     # 28 (P5_out / N5, c=96)
+   
+   # --- YOLO Head (Detect) ---
+   # Connect the 3 output layers (N3, N4, N5) to the Detect module
+   [[22, 25, 28], 1, Detect, [nc, anchors]],                     # 29 Detect(P3_out, P4_out, P5_out)
+  ]
